@@ -9,21 +9,14 @@
       <!-- Javascript and Cascading Style Sheets (css) libraries -->
       <!-- mostly from content delivery networks                 -->
       <!-- jquery; CDN load is usually quick because it's likely cached -->
-      <script type="text/javascript"
-         src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <!-- 12 column grid rearranges itself for smaller screens or windows. -->
       <!-- This project is using an older version, make sure to check out newer versions! -->
       <!-- http://getbootstrap.com/getting-started/  -->
       <!-- Compiled and minified CSS -->
-      <link rel="stylesheet"
-         href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-         integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
-         crossorigin="anonymous">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
       <!-- Compiled and minified JavaScript -->
-      <script
-         src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-         integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-         crossorigin="anonymous"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
       <!-- Let's set our title! -->
       <title>Vocabulary Anagram</title>
       <!-- Our own css file.  Note how we can link directly here and not -->
@@ -37,21 +30,15 @@
                <h1>Words</h1>
             </div>
          </div>
-         <!-- Vocabularly words layed out in 6 columns;
-             bootstrap may collapse to fewer columns and
-             more rows if the window is narrow.
-            -->
          <div class="row">
             {% for word in g.vocab %}
             <div class="col-xs-2 text-center"> {{ word }} </div>
             {% if loop.index is divisibleby 3 %}
          </div>
-         <!-- row -->
          <div class="row">
             {% endif %}
             {% endfor %}
          </div>
-         <!-- row -->
          <br />
          <div class="row">
             <div class="col-xs-6 text-center">
@@ -67,18 +54,15 @@
             <div class="col-xs-6 text-center">
                to spell {{session.target_count}} words from the list.
             </div>
-            <!-- col -->
          </div>
-         <!-- row -->
          <br />
          <div class="row">
             <div class="col-xs-6 text-center">
                <form id="entry" method="POST" action="/_check">
                   <label for="attempt">Word:</label>
-                  <input id="attempt" name="attempt" type="text" width="15"
-                     autocomplete="off"  autofocus />
-                  <input type="submit" name="try" />
+                  <input id="attempt" name="attempt" type="text" width="15" autocomplete="off" autofocus />
                </form>
+               <div id="response"></div> <!-- New div to display response -->
             </div>
          </div>
          <br />
@@ -99,6 +83,37 @@
          {% endif %}
          {% endwith %}
       </div>
-      <!-- container -->
+      <script>
+         $(document).ready(function() {
+            $("#attempt").on("input", function() {
+                var txt = $("#attempt").val();
+                if (txt.length > 0) {
+                    var keycode = txt.charCodeAt(txt.length - 1); 
+                    var letter = String.fromCharCode(keycode);
+                    
+                    if (! "ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter)) { 
+                        return;
+                    }
+
+                    $.getJSON( "/_countem", { text: txt },
+                        function(data) {
+                            rsval = data.result.long_enough;
+                            console.log("rsval: " + rsval)
+                            if (rsval) {
+                                $("#response").html("That's enough!");
+                                $("#attempt").val("");
+                            } else {
+                                $("#response").html(txt.length + " ");
+                            }
+                        }
+                    );
+                }
+            });
+         });
+      </script>
    </body>
 </html>
+
+
+
+
