@@ -62,57 +62,93 @@
                   <label for="attempt">Word:</label>
                   <input id="attempt" name="attempt" type="text" width="15" autocomplete="off" autofocus />
                </form>
-               <div id="response"></div> <!-- New div to display response -->
             </div>
          </div>
          <br />
-         {% if session.matches|length is not equalto 0  %}
          <h2>You found </h2>
          <p id="results">
             {% for match in session.matches %}
-            {{ match }}
+            {{ match }}<br>
             {% endfor %}
          </p>
-         {% endif %}
-         {% with messages = get_flashed_messages() %}
-         {% if messages %}
-         <!-- Mismatch, already found, etc. "flashed" from Python -->
-         {% for message in messages %}
-         <p class="message">{{ message }}</p>
-         {% endfor %}
-         {% endif %}
-         {% endwith %}
+         <br />
+         <div class="row">
+            <div class="col-xs-6 text-center">
+               <p class="message"></p>
+            </div>
+         </div>
       </div>
       <script>
-         $(document).ready(function() {
-            $("#attempt").on("input", function() {
-                var txt = $("#attempt").val();
-                if (txt.length > 0) {
-                    var keycode = txt.charCodeAt(txt.length - 1); 
-                    var letter = String.fromCharCode(keycode);
-                    
-                    if (! "ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter)) { 
-                        return;
-                    }
+         // Define a function to handle form submission via AJAX
+         function checkWord() {
+             var text = $("#attempt").val(); // Get the value of the input field
+             $.ajax({
+                 type: "POST",
+                 url: "/_check",
+                 data: {attempt: text}, // Send the word as data
+                 dataType: "json",
+                 success: function(response) {
+                     if (response.success) {
+                         $("#results").append(response.message + "<br>");
+                         if (response.redirect) {
+                             window.location.href = "/success";
+                         }
+                     } else {
+                         $(".message").text(response.message);
+                     }
+                 },
+                 error: function(error) {
+                     console.log(error);
+                 }
+             });
+             return false; // Prevent the form from actually submitting
+         }
 
-                    $.getJSON( "/_countem", { text: txt },
-                        function(data) {
-                            rsval = data.result.long_enough;
-                            console.log("rsval: " + rsval)
-                            if (rsval) {
-                                $("#response").html("That's enough!");
-                                $("#attempt").val("");
-                            } else {
-                                $("#response").html(txt.length + " ");
-                            }
-                        }
-                    );
-                }
-            });
+         // Attach the checkWord function to the form's submit event
+         $("#entry").submit(checkWord);
+
+         // Automatically submit the form when a key is pressed
+         $("#attempt").on("input", function() {
+             checkWord();
          });
       </script>
    </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
